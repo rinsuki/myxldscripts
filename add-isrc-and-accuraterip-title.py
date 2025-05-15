@@ -49,7 +49,7 @@ for gp in [os.path.join(os.environ["HOME"], "Desktop/xld-out/y*_/*.log")]:
                 is_perfectread_failed = (track.accuraterip_result is None or is_accuraterip_failed) and (track.statistics.damaged_sector_count > 0)
                 is_test_failed = track.crc32_hash_test is not None and track.crc32_hash_test != track.crc32_hash
                 if track.accuraterip_result is None and (track.statistics.jitter_error > 0 or track.statistics.read_error > 0 or track.statistics.damaged_sector_count > 0):
-                    raise Exception("AccurateRip が通っていないのにリッピング時にエラーが出ています！再度リッピングすることを推奨します")
+                    raise Exception("AccurateRip の情報がないディスクでリッピング時にエラーが出ています！再度リッピングすることを推奨します")
                 isrc_match = None
                 if RE_LAST_ISRC is not None:
                     isrc_match = RE_LAST_ISRC.search(track.filename)
