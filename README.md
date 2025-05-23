@@ -69,4 +69,7 @@
 * Finder上でタイムスタンプが更新されたことを確認し、iTunes の「最近追加した項目」にフォルダごとドラッグ&ドロップする
 * iTunes 上でファイルが全てコピーされたことを確認し、`~/Desktop/xld-out/!done` フォルダに先程D&Dしたフォルダを移動する
   * Finder のサイドバーに `!done` フォルダを登録しておくと便利です
-* TODO: zipdisc のスクリプトを公開する
+* `python3 create-zipdisc-g2.py` を実行する
+  * `~/Desktop/xld-out/!done/zipdisc` フォルダに、リッピングしたCDのフォルダが zip 圧縮されて保存されます
+* `~/Desktop/xld-out/!done/zipdisc/*.zip` をバックアップする
+* `~/Desktop/xld-out/!done/zipdisc/*.zip` と `~/Desktop/xld-out/!done/zipdisc/origfiles/*.m4a` を削除する
