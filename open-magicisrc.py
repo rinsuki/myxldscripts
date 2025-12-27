@@ -7,6 +7,7 @@ import urllib.parse
 import os.path
 import httpx
 import webbrowser
+import time
 
 RE_ISRC = r"((?:JP|IT|US|TC|QM|GB|FR)[A-Z0-9]{3}[0-9]{2}[0-9]{5}|NO_ISRC)"
 RE_FIRST_ISRC = re.compile(r"^.+/[0-9]{2}\(" + RE_ISRC + r"\) [^/]+\.m4a$")
@@ -42,10 +43,20 @@ note.append(f"Target Release: {mb_release_url} (Disc {disc_no})")
 note.append(f"CD TOC: {mb_cdtoc_url}")
 note.append("")
 
-mb_res = httpx.get("https://musicbrainz.org/ws/2/release/" + mb_release_id, params={
-    "inc": "recordings+isrcs+discids",
-    "fmt": "json",
-})
+fail = 0
+while True:
+    try:
+        mb_res = httpx.get("https://musicbrainz.org/ws/2/release/" + mb_release_id, params={
+            "inc": "recordings+isrcs+discids",
+            "fmt": "json",
+        }, headers={
+            "User-Agent": "open-magicisrc.py/0.1 (+https://github.com/rinsuki/myxldscripts)"
+        })
+        break
+    except httpx.ConnectError:
+        fail += 1
+        print("Connection error, retrying...")
+        time.sleep(fail)
 print(mb_res.url)
 mb_res.raise_for_status()
 mb_res = mb_res.json()
