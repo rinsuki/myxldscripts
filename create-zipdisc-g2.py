@@ -112,6 +112,9 @@ def get_disc_id(file: MP4):
     raise Exception("unknown disc id")
 
 for file in glob(BASE_DIR_SRC + "y*_/*.log"):
+    cuefile = file[:-3] + "cue"
+    if not os.path.exists(cuefile):
+        cuefile = None
     AUDIO_FILE_DIR = os.path.dirname(file) + "/"
     print(file)
     xldlog = XLDLog.parse(open(file, "r"))
@@ -184,6 +187,8 @@ for file in glob(BASE_DIR_SRC + "y*_/*.log"):
                 assert track_file.tags[CDDB_KEY][0].decode() == cddb
                 zf.write(track_src, "tracks/" + track_fn)
             zf.write(file, "log/" + os.path.basename(file))
+            if cuefile is not None:
+                zf.write(cuefile, "log/" + os.path.basename(cuefile))
     except Exception as e:
         os.unlink(BASE_DIR_DST + disczip_filename)
         if type(e) is MutagenError:
@@ -197,3 +202,6 @@ for file in glob(BASE_DIR_SRC + "y*_/*.log"):
         os.rename(track_src, track_dst)
     file_dest = BASE_DIR_ORIGLOGS + disczip_filename + "." + os.path.basename(file)
     os.rename(file, file_dest)
+    if cuefile is not None:
+        cuefile_dest = BASE_DIR_ORIGLOGS + disczip_filename + "." + os.path.basename(cuefile)
+        os.rename(cuefile, cuefile_dest)
