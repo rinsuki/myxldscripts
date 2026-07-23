@@ -67,7 +67,6 @@ for gp in [os.path.join(os.environ["HOME"], "Desktop/xld-out/y*_/*.log")]:
                     mf.tags['----:com.apple.iTunes:ISRC'] = [MP4FreeForm(isrc_match.group(1).encode("ascii"))]
                 # print(mf.pprint(), mf.tags)
                 # AccurateRip がダメだったらタイトルにおまけを付ける
-                # TODO: cuetools 相当のタグを付ける
                 if track.accuraterip_result is None:
                     if is_test_failed:
                         raise Exception("AccurateRip が存在しないディスクでテストリップと本リップの結果が一致していません！再度リッピングすることを推奨します")
@@ -82,4 +81,30 @@ for gp in [os.path.join(os.environ["HOME"], "Desktop/xld-out/y*_/*.log")]:
                 else:
                     # リッピング大成功
                     pass
+                # cuetools 相当のタグを付ける
+                for tag in [
+                    '----:com.apple.iTunes:ACCURATERIPID',
+                    '----:com.apple.iTunes:ACCURATERIPCOUNT',
+                    '----:com.apple.iTunes:ACCURATERIPCOUNTWITHOFFSET',
+                    '----:com.apple.iTunes:ACCURATERIPCOUNTALLOFFSETS',
+                    '----:com.apple.iTunes:ACCURATERIPOFFSET',
+                    '----:com.apple.iTunes:ACCURATERIPTOTAL',
+                ]:
+                    if tag in mf.tags:
+                        del mf.tags[tag]
+                if xldlog.accuraterip_disc_id is not None:
+                    mf.tags['----:com.apple.iTunes:ACCURATERIPID'] = [MP4FreeForm(xldlog.accuraterip_disc_id.encode("ascii"))]
+                mf.tags['----:com.apple.iTunes:ACCURATERIPCRC'] = [MP4FreeForm(track.accuraterip_v1.encode("ascii"))]
+                if track.accuraterip_result is not None:
+                    if track.accuraterip_result.success_summary is not None:
+                        confidences = track.accuraterip_result.success_summary.confidence_used_v1+track.accuraterip_result.success_summary.confidence_used_v2
+                        if track.accuraterip_result.success_summary.offset == 0:
+                            mf.tags['----:com.apple.iTunes:ACCURATERIPCOUNT'] = [MP4FreeForm(str(confidences).encode("ascii"))]
+                        else:
+                            mf.tags['----:com.apple.iTunes:ACCURATERIPCOUNTWITHOFFSET'] = [MP4FreeForm(str(confidences).encode("ascii"))]
+                            offset_str = str(track.accuraterip_result.success_summary.offset)
+                            if track.accuraterip_result.success_summary.offset > 0:
+                                offset_str = "+" + offset_str
+                            mf.tags['----:com.apple.iTunes:ACCURATERIPOFFSET'] = [MP4FreeForm(offset_str.encode("ascii"))]
+                    mf.tags['----:com.apple.iTunes:ACCURATERIPTOTAL'] = [MP4FreeForm(str(track.accuraterip_result.confidence_total).encode("ascii"))]
                 mf.save()
