@@ -9,6 +9,8 @@ import httpx
 import webbrowser
 import time
 
+client = httpx.Client(transport=httpx.HTTPTransport(retries=100))
+
 RE_ISRC = r"((?:JP|IT|US|TC|QM|GB|FR)[A-Z0-9]{3}[0-9]{2}[0-9]{5}|NO_ISRC)"
 RE_FIRST_ISRC = re.compile(r"^.+/[0-9]{2}\(" + RE_ISRC + r"\) [^/]+\.m4a$")
 
@@ -46,7 +48,7 @@ note.append("")
 fail = 0
 while True:
     try:
-        mb_res = httpx.get("https://musicbrainz.org/ws/2/release/" + mb_release_id, params={
+        mb_res = client.get("https://musicbrainz.org/ws/2/release/" + mb_release_id, params={
             "inc": "recordings+isrcs+discids",
             "fmt": "json",
         }, headers={
