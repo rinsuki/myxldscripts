@@ -1,5 +1,6 @@
 from glob import glob
-from xldparser import XLDLog
+import subprocess
+from xldparser import XLDLog, XLDTrackEntryCancelled
 import zipfile
 import os.path
 from mutagen import MutagenError
@@ -181,11 +182,20 @@ for file in glob(BASE_DIR_SRC + "y*_/*.log"):
         with zipfile.ZipFile(BASE_DIR_DST + disczip_filename, "w") as zf:
             for track in xldlog.tracks:
                 print(track)
+                assert not isinstance(track, XLDTrackEntryCancelled)
                 track_fn = os.path.basename(track.filename)
                 track_src = AUDIO_FILE_DIR + track_fn
                 track_file = MP4(track_src)
                 assert track_file.tags[CDDB_KEY][0].decode() == cddb
                 zf.write(track_src, "tracks/" + track_fn)
+                sp = subprocess.run([
+                    ".build/release/afverify",
+                    track_src,
+                    track.crc32_hash
+                ], stdout=subprocess.PIPE)
+                sp.check_returncode()
+                sp = sp.stdout.decode("ascii").strip()
+                assert sp == f"calc={track.crc32_hash},expected={track.crc32_hash},exit=0", sp
             zf.write(file, "log/" + os.path.basename(file))
             if cuefile is not None:
                 zf.write(cuefile, "log/" + os.path.basename(cuefile))
